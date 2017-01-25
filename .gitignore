@@ -1,0 +1,15 @@
+*.o
+.*.swp
+#*.git*
+*.txt
+*.sys
+*.out
+*.debug
+#*.patch
+*.a
+/src/stage
+/src/user/exec
+*.dep
+*.state
+#*.git
+#*ignore
