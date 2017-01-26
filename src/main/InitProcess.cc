@@ -30,5 +30,8 @@ int InitProcess() {
 
   Process* p4 = knew<Process>();
   p4->exec("summationApp");
+
+//Install Assignment 1 here
+
   return 0;
 }

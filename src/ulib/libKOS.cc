@@ -134,6 +134,16 @@ extern "C" int kill(pid_t pid, int sig) {
   return -1;
 }
 
+//Hello world sample
 extern "C" int syscallSummation(int a, int b){
   return syscallStub(SyscallNum::syscallSummationEnum, a, b);
+}
+
+/**** assignment1 functions ******/
+extern "C" int sched_setaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
+  return syscallStub(SyscallNum::sched_setaffinitySys, pid, cpusetsize, *mask);
+}
+
+extern "C" int sched_getafifnity(pid_t pid, size_t cputsetsize, cpu_set_t *mask){
+  return syscallStub(SyscallNum::sched_getaffinitySys, pid, cpusetsize, *mask);
 }

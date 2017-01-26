@@ -23,11 +23,18 @@ extern "C" int privilege(void*, mword, mword, mword, mword);
 
 extern "C" int syscallSummation(int a, int b);
 
+/* Assignment 1 additional system calls */
+extern "C" sched_setaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask);
+
+extern "C" sched_getaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask);
+
 namespace SyscallNum {
 
 enum : mword {
   _exit = 0,
   syscallSummationEnum,
+  sched_setaffinityEnum,
+  sched_getaffinityEnum,
   open,
   close,
   read,

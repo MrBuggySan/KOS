@@ -218,8 +218,50 @@ extern "C" void _init_sig_handler(vaddr sighandler) {
   CurrProcess().setSignalHandler(sighandler);
 }
 
+//This is hte hello world system call
 extern "C" int syscallSummation(int a, int b){
   return a + b;
+}
+
+
+// assignment 1 additional system calls
+// assignment 2 additional system calls
+extern "C" sched_setaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
+  //ensure pid is 0
+  if (pid != 0){
+    //how to set EPERM error?
+    return EPERM;// where to get EPERM from?
+  }
+  //get the number of cores
+  mword numCores =  Machine::getProcessorCount();
+  // let's assume 4 cores
+  // mword numCores = 4;
+
+  //check if mask is only for the number of cores we have
+  cpu_set_t extraCores = *mask;
+  extraCores = extraCores>>numCores;
+  if(extraCores != 0){
+    //how to set EINVAL error?
+    return EINVAL; //where to get EINVAL?
+  }
+
+  //check if the affinity mask already has the same value as mask
+
+
+  //set the affinity mask
+}
+
+extern "C" sched_getaffinity(pid_t pid, size_t cpusetsize, cput_set_t *mask){
+  //ensure pid is 0
+  if (pid != 0){
+    return EPERM;
+  }
+
+  //get the affinity mask
+  cpu_set_t affinityMask = Runtime::getCurrThread()->getAffinityMask();
+
+  //set the value of mask to affinity mask
+  mask = &affinityMask;
 }
 
 /******* dummy functions *******/
@@ -251,6 +293,8 @@ typedef ssize_t (*syscall_t)(mword a1, mword a2, mword a3, mword a4, mword a5);
 static const syscall_t syscalls[] = {
   syscall_t(_exit),
   syscall_t(syscallSummation),
+  syscall_t(sched_setaffinity),
+  syscall_t(sched_getaffinity),
   syscall_t(open),
   syscall_t(close),
   syscall_t(read),
