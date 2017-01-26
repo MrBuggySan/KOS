@@ -444,6 +444,11 @@ void Machine::setAffinity(Thread& t, mword idx) {
   t.setAffinity(processorTable[idx].scheduler);
 }
 
+Scheduler* Machine::getScheduler(mword idx){
+	KASSERT1(idx < processorCount, idx);
+	return processorTable[idx].scheduler;
+}
+
 void Machine::sendIPI(mword idx, uint8_t vec) {
   MappedAPIC()->sendIPI(processorTable[idx].apicID, vec);
 }
