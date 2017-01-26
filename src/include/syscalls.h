@@ -21,10 +21,13 @@ extern "C" long get_core_count();
 
 extern "C" int privilege(void*, mword, mword, mword, mword);
 
+extern "C" int syscallSummation(int a, int b);
+
 namespace SyscallNum {
 
 enum : mword {
   _exit = 0,
+  syscallSummationEnum,
   open,
   close,
   read,

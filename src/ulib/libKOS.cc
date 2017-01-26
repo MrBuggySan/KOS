@@ -1,5 +1,5 @@
 /******************************************************************************
-    Copyright © 2012-2015 Martin Karsten
+    Copyright ï¿½ 2012-2015 Martin Karsten
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -132,4 +132,8 @@ extern "C" int isatty(int fildes) {
 extern "C" int kill(pid_t pid, int sig) {
   *__errno() = EINVAL;
   return -1;
+}
+
+extern "C" int syscallSummation(int a, int b){
+  return syscallStub(SyscallNum::syscallSummationEnum, a, b);
 }

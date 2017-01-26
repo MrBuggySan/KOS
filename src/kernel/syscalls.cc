@@ -1,5 +1,5 @@
 /******************************************************************************
-    Copyright © 2012-2015 Martin Karsten
+    Copyright ï¿½ 2012-2015 Martin Karsten
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -218,6 +218,10 @@ extern "C" void _init_sig_handler(vaddr sighandler) {
   CurrProcess().setSignalHandler(sighandler);
 }
 
+extern "C" int syscallSummation(int a, int b){
+  return a + b;
+}
+
 /******* dummy functions *******/
 
 extern "C" int fstat(int fildes, struct stat *buf) {
@@ -246,6 +250,7 @@ void* __dso_handle = nullptr;
 typedef ssize_t (*syscall_t)(mword a1, mword a2, mword a3, mword a4, mword a5);
 static const syscall_t syscalls[] = {
   syscall_t(_exit),
+  syscall_t(syscallSummation),
   syscall_t(open),
   syscall_t(close),
   syscall_t(read),
