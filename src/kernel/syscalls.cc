@@ -27,6 +27,9 @@
 #include "syscalls.h"
 #include "pthread.h"
 
+//for the error constants
+#include "errno.h"
+
 /******* libc functions *******/
 
 // for C-style 'assert' (e.g., from malloc.c)
@@ -246,9 +249,15 @@ extern "C" sched_setaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
   }
 
   //check if the affinity mask already has the same value as mask
-
+  if(*mask == Runtime::getCurrThread()->getAffinityMask()){
+    //we do not have to set the AffinityMask again
+    return;
+  }
 
   //set the affinity mask
+  //how to set appropriately?
+   Runtime::getCurrThread()->setAffinityMask(*mask);
+  setAffinityMask(*mask);
 }
 
 extern "C" sched_getaffinity(pid_t pid, size_t cpusetsize, cput_set_t *mask){
