@@ -29,7 +29,7 @@ int InitProcess() {
   p3->exec("manythread");
 
   Process* p4 = knew<Process>();
-  p4->exec("summationApp");
+  p4->exec("schedAffinityTest");
 
 //Install Assignment 1 here
 

@@ -141,9 +141,9 @@ extern "C" int syscallSummation(int a, int b){
 
 /**** assignment1 functions ******/
 extern "C" int sched_setaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
-  return syscallStub(SyscallNum::sched_setaffinitySys, pid, cpusetsize, *mask);
+  return syscallStub(SyscallNum::sched_setaffinityEnum, pid, cpusetsize, *mask);
 }
 
-extern "C" int sched_getafifnity(pid_t pid, size_t cputsetsize, cpu_set_t *mask){
-  return syscallStub(SyscallNum::sched_getaffinitySys, pid, cpusetsize, *mask);
+extern "C" int sched_getaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
+  return syscallStub(SyscallNum::sched_getaffinityEnum, pid, cpusetsize, *mask);
 }

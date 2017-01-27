@@ -1,5 +1,5 @@
 /******************************************************************************
-    Copyright © 2012-2015 Martin Karsten
+    Copyright ï¿½ 2012-2015 Martin Karsten
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -121,8 +121,9 @@ void Scheduler::preempt() {               // IRQs disabled, lock count inflated
 #else /* migration enabled */
   //Scheduler* target =  Runtime::getCurrThread()->getAffinity();
   Scheduler *target = nullptr;
+  Scheduler *newTarget = nullptr;
   mword affinityMask = Runtime::getCurrThread()->getAffinityMask();
-  
+
   if( affinityMask == 0 ) {
 	  /* use Martin's code when no affinity is set via bit mask */
 	  target =  Runtime::getCurrThread()->getAffinity();
@@ -133,55 +134,53 @@ void Scheduler::preempt() {               // IRQs disabled, lock count inflated
       * switchThread(target) migrates the current thread to
       * specified target's ready queue
       */
-	  
+
 	  mword minReady = 0;
-	  Scheduler *newTarget; 
-	  
-	  //Check the 1st core 
+	  //Check the 1st core
 	  if(affinityMask & 1){
-		  //get the ready count 
+		  //get the ready count
 		  mword tempReady = Machine::getScheduler(0)->readyCount;
 		  //compare with minReady
-		  if(tempReady < minReady){
+		  if(tempReady <= minReady){
 			minReady = tempReady;
 			newTarget = Machine::getScheduler(0);
 		  }
 	  }
-	  
-	  
-	  //Check the 2nd core 
+
+
+	  //Check the 2nd core
 	  if(affinityMask & 2){
-		  //get the ready count 
+		  //get the ready count
 		  mword tempReady = Machine::getScheduler(1)->readyCount;
 		  //compare with minReady
-		  if(tempReady < minReady){
+		  if(tempReady <= minReady){
 			minReady = tempReady;
 			newTarget = Machine::getScheduler(1);
 		  }
 	  }
-	  
-	  //Check the 3rd core 
+
+	  //Check the 3rd core
 	  if(affinityMask & 4){
-		  //get the ready count 
+		  //get the ready count
 		  mword tempReady = Machine::getScheduler(2)->readyCount;
 		  //compare with minReady
-		  if(tempReady < minReady){
+		  if(tempReady <= minReady){
 			minReady = tempReady;
 			newTarget = Machine::getScheduler(2);
 		  }
 	  }
-	  
-	  //Check the 4th core 
+
+	  //Check the 4th core
 	  if(affinityMask & 8){
-		  //get the ready count 
+		  //get the ready count
 		  mword tempReady = Machine::getScheduler(3)->readyCount;
 		  //compare with minReady
-		  if(tempReady < minReady){
+		  if(tempReady<= minReady){
 			minReady = tempReady;
 			newTarget = Machine::getScheduler(3);
 		  }
 	  }
-	  
+
 	  target = newTarget;
    }
 
