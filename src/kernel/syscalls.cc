@@ -228,29 +228,21 @@ extern "C" int syscallSummation(int a, int b){
 
 
 // assignment 1 additional system calls
-// assignment 2 additional system calls
 extern "C" int sched_setaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
-  //ensure pid is 0
-  cpu_set_t errno;
-  if (pid != 0){
-	errno = EPERM;
-    return errno;// return EPERM
-  }
-  //get the number of cores
-  mword numCores =  Machine::getProcessorCount();
 
-  if(numCores > 4){
-	// let's assume 4 cores
-	numCores = 4;
+  //ensure pid is 0
+  if (pid != 0){
+	// errno = EPERM;
+    return EPERM;// return EPERM
   }
 
   //check if mask is only for the number of cores we have
   cpu_set_t extraCores = *mask;
-  extraCores = extraCores>>numCores;
+  extraCores = extraCores & 0xFFFFFFFFFFFFFFF0;
   if(extraCores != 0){
-	errno = EINVAL;
-    return errno; //return EINVAL
+    return EINVAL; //return EINVAL
   }
+
 	//set the affinity mask
 	LocalProcessor::getCurrThread()->setAffinityMask(*mask);
 	LocalProcessor::getScheduler()->yield();
@@ -261,10 +253,8 @@ extern "C" int sched_setaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
 
 extern "C" int sched_getaffinity(pid_t pid, size_t cpusetsize, cpu_set_t *mask){
   //ensure pid is 0
-  cpu_set_t errno;
   if (pid != 0){
-    errno = EPERM;
-    return errno;// return EPERM
+    return EPERM;// return EPERM
   }
 
   //get the affinity mask
