@@ -51,7 +51,20 @@ void kosMain() {
       KOUT::out1(c);
     }
     KOUT::outl();
-  }
+//Print out the contents of schedParam
+  iter = kernelFS.find("schedParam");
+
+   if (iter == kernelFS.end()) {
+    KOUT::outl("schedParam information not found");
+  } else {
+    FileAccess f(iter->second);
+    for (;;) {
+      char c;
+      if (f.read(&c, 1) == 0) break;
+      KOUT::out1(c);
+    }
+    KOUT::outl();
+ }
 #if TESTING_TIMER_TEST
   StdErr.print(" timer test, 3 secs...");
   for (int i = 0; i < 3; i++) {
