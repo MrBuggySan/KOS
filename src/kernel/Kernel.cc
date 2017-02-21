@@ -51,6 +51,10 @@ void kosMain() {
       KOUT::out1(c);
     }
     KOUT::outl();
+  }
+//TODO: Print out the frequency of RTC here
+
+
 //Print out the contents of schedParam
   iter = kernelFS.find("schedParam");
 
@@ -64,7 +68,8 @@ void kosMain() {
       KOUT::out1(c);
     }
     KOUT::outl();
- }
+  }
+
 #if TESTING_TIMER_TEST
   StdErr.print(" timer test, 3 secs...");
   for (int i = 0; i < 3; i++) {
