@@ -21,8 +21,8 @@
 #include "kernel/Output.h"
 
 //add the static variables here 
-static mword mingranularity;
-static mword epochlen;
+//static mword mingranularity;
+//static mword epochlen;
 
 Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(this) {
  //parse the schedparam file from /kos/src/user/exec/motb
