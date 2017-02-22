@@ -21,8 +21,11 @@
 #include "world/Access.h"
 #include "machine/Machine.h"
 #include "devices/Keyboard.h"
+#include "runtime/Scheduler.h"
 
 #include "main/UserMain.h"
+
+#include <fstream>
 
 AddressSpace kernelSpace(true); // AddressSpace.h
 volatile mword Clock::tick;     // Clock.h
@@ -53,6 +56,12 @@ void kosMain() {
     KOUT::outl();
   }
 //TODO: Print out the frequency of RTC here
+
+
+ std::ifstream parsefile("/home/uga/abuiza/kos/src/user/exec/schedParam");
+  if(parsefile.is_open()){
+parsefile.close();
+   }
 
 
 //Print out the contents of schedParam

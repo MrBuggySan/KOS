@@ -37,13 +37,10 @@ exec/motb: .FORCE
 exec/schedParam: .FORCE
 	@echo creating $@
 	@echo > $@
-	@echo "This is schedParam." >> $@
+	@echo -n "minGranularity,6, this is a test value. " >> $@
 	@echo >> $@
-	@echo -n "minGranularity=6 . this is a test value. " >> $@
-	@echo -n "epochLength=7 .  this is a test value" >> $@
-	@date >> $@
+	@echo -n "epochLength,7,  this is a test value" >> $@
 	@echo >> $@
-	@echo "testing here." >> $@
 
 echo:
 	@echo SRC: $(SRC)
