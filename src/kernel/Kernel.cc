@@ -84,7 +84,6 @@ bool String2Int(const std::string& str, mword& result)
 void kosMain() {
 
 //TODO: Print out the frequency of RTC here
-
   KOUT::outl("Welcome to KOS!", kendl);
   auto iter = kernelFS.find("motb");
   if (iter == kernelFS.end()) {
@@ -98,6 +97,8 @@ void kosMain() {
     }
     KOUT::outl();
   }
+
+
 //Print out the contents of schedParam
 mword minGranularity = 0;
 mword epochLength = 0;
@@ -139,7 +140,7 @@ mword epochLength = 0;
           }
           num.clear();
           //enter the value to the Scheduler object
-          Scheduler::epochLength = epochLength;
+          Scheduler::defaultEpochLength = epochLength;
         }
       }
       if(startRead){

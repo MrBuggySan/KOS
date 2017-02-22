@@ -21,11 +21,6 @@
 #include "kernel/Output.h"
 #include <fstream>
 
-//Initialize the Scheduler parameters
-mword Scheduler::minGranularity  = 10;
-mword Scheduler::epochLength = 10;
-mword Scheduler::defaultEpochLength = 10;
-
 
 
 Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(this) {
@@ -120,7 +115,22 @@ void Scheduler::resume(Thread& t) {
   else Runtime::getScheduler()->enqueue(t);
 }
 
+
+
 void Scheduler::preempt() {               // IRQs disabled, lock count inflated
+//Test if the current running task can be preempted or let it run ?
+//has the current task run enough real time units?
+
+//How can I set up the epochlength of this CPU?
+
+//Where to assign the vRuntime to real time unit conversions?
+
+//How to count the real time units that passed for each task?
+
+//How to enqueue a new task to the tree?
+
+//How to deal with I/O blocking? 
+
 #if TESTING_NEVER_MIGRATE
   switchThread(this);
 #else /* migration enabled */
