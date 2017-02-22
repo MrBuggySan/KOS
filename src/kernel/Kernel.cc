@@ -117,7 +117,6 @@ mword epochLength = 0;
         startRead=false;
         //convert the chars into mword
         if(minGranularity == 0){
-
             std::string msg = "\n1st read value:";
             KOUT::out1(msg);
             if(String2Int(num, minGranularity)){
@@ -128,6 +127,7 @@ mword epochLength = 0;
             }
             num.clear();
           //enter the value to the Scheduler object
+          Scheduler::minGranularity = minGranularity;
         }else{
           std::string msg = "\n2nd read value:";
           KOUT::out1(msg);
@@ -139,6 +139,7 @@ mword epochLength = 0;
           }
           num.clear();
           //enter the value to the Scheduler object
+          Scheduler::epochLength = epochLength;
         }
       }
       if(startRead){
