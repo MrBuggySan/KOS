@@ -37,9 +37,7 @@ exec/motb: .FORCE
 exec/schedParam: .FORCE
 	@echo creating $@
 	@echo > $@
-	@echo -n "minGranularity,6, this is a test value. " >> $@
-	@echo >> $@
-	@echo -n "epochLength,7,  this is a test value" >> $@
+	@echo -n "minGranularity=4;epochLength=20;" >> $@
 	@echo >> $@
 
 echo:

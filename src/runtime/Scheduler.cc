@@ -29,32 +29,6 @@ mword Scheduler::defaultEpochLength = 10;
 
 
 Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(this) {
- //parse the schedparam file from /kos/src/user/exec/motb
-// try{
-//  std::ifstream parsefile("/home/uga/abuiza/kos/src/user/exec/schedParam");
-  // if(parsefile.is_open()){
-   //}
-  //  else{
-  //    throw 300;
-  //  }
-   //parsefile.close();
-
- // }catch(int e){
- //   //make the program crash
- //   return;
- // }
-
-  // std::ifstream parsefile("/home/uga/abuiza/kos/src/user/exec/schedParam");
-  //  if(parsefile.is_open()){
-  //
-  //        parsefile.close();
-  //   }
-    // else{
-    //   throw 300;
-    // }
-
-
-
 
   Thread* idleThread = Thread::create((vaddr)idleStack, minimumStack);
   idleThread->setAffinity(this)->setPriority(idlePriority);
