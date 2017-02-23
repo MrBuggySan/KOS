@@ -20,11 +20,11 @@
 #include "runtime/Thread.h"
 #include "kernel/Output.h"
 #include "kernel/Output.h"
-#include "kernel/Tree.h"
 
 
 
-Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(this) {
+
+Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(this), currRealTimeCount(0) {
 
   Thread* idleThread = Thread::create((vaddr)idleStack, minimumStack);
   idleThread->setAffinity(this)->setPriority(idlePriority);
@@ -32,6 +32,10 @@ Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(th
   idleThread->stackPointer = stackInit(idleThread->stackPointer, &Runtime::getDefaultMemoryContext(), (ptr_t)Runtime::idleLoop, this, nullptr, nullptr);
   readyQueue[idlePriority].push_back(*idleThread);
   readyCount += 1;
+
+
+  //Initialize the tree that contains the threads waiting to be served
+  readyTree = new Tree<ThreadNode>();
 }
 
 static inline void unlock() {}
@@ -119,8 +123,15 @@ void Scheduler::resume(Thread& t) {
 
 
 void Scheduler::preempt() {               // IRQs disabled, lock count inflated
-//Test if the current running task can be preempted or let it run ?
-//has the current task run enough real time units?
+
+currRealTimeCount++;
+if (currRealTimeCount == minGranularity){
+    //update vRuntime of the running task
+
+    //check the tree and the current task for next task to run
+
+    currRealTimeCount = 0;
+}
 
 //How can I set up the epochlength of this CPU?
 

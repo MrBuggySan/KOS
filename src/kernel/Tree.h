@@ -16,19 +16,23 @@ public:
         int size, height;
         node(const T &_item, node *_p = NULL) : item(_item), p(_p),
         l(NULL), r(NULL), size(1), height(0) { } };
+
+
     Tree() : root(NULL) { }
+
+    
     node *root;
-    
+
     bool empty() const {
-		return root==NULL;
-	}
-    
+		    return root==NULL;
+	     }
+
     T* readMinNode() const {
         node *cur = root;
         while (cur->l){ cur=cur->l; }
         return &(cur->item);
     }
-    
+
     T* popMinNode() {
         node *cur = root;
         while (cur->l){ cur=cur->l; }
@@ -36,7 +40,7 @@ public:
         erase(cur);
         return item;
     }
-    
+
     node* find(const T &item) const {
         node *cur = root;
         while (cur) {
@@ -44,7 +48,7 @@ public:
             else if (item < cur->item) cur = cur->l;
             else break; }
         return cur; }
-        
+
     void insert(const T &item) {
         node *prev = NULL, **cur = &root;
         while (*cur) {
@@ -56,7 +60,7 @@ public:
         *cur = n, fix(n);
 		return;
 	}
-	
+
     void deleteNode(const T &item) {erase(find(item));}
     void erase(node *n) {
         if (!n) return;
@@ -73,7 +77,7 @@ public:
         } else parent_leg(n) = NULL;
         fix(n->p), n->p = n->l = n->r = NULL;
 	}
-	
+
     node* successor(node *n) const {
         if (!n) return NULL;
         if (n->r) return nth(0, n->r);
@@ -81,7 +85,7 @@ public:
         while (p && p->r == n) n = p, p = p->p;
         return p;
 	}
-    
+
     node* nth(int n, node *cur = NULL) const {
         if (!cur) cur = root;
         while (cur) {
@@ -109,7 +113,7 @@ private:
         if (n->p->l == n) return n->p->l;
         if (n->p->r == n) return n->p->r;
     }
-    
+
     void augment(node *n) {
         if (!n) return;
         n->size = 1 + sz(n->l) + sz(n->r);
@@ -141,33 +145,9 @@ private:
 };
 
 
-// Class for tree node
-class ThreadNode{
-	friend class Scheduler;
-	Thread *th;
-	
-	public:
-		bool operator < (ThreadNode other) const {
-			return th->priority < other.th->priority;
-		}
-		bool operator == (ThreadNode other) const {
-			return th->priority == other.th->priority;
-		}
-		bool operator > (ThreadNode other) const {
-			return th->priority > other.th->priority;
-		}
-    
-	//this is how we want to do it
-	ThreadNode(Thread *t){
-		th = t;
-	}
-};
 
-//Declare a tree
-Tree<ThreadNode> *readyTree;
 
-//Initialize the tree that contains the threads waiting to be served
-readyTree = new Tree<ThreadNode>();
+
 
 //Add a thread to the tree. anyThreadClassObject is an object of ThreadClass
-readyTree->insert(*(new ThreadNode(*anyThreadClassObject)));
+// readyTree->insert(*(new ThreadNode(*anyThreadClassObject)));

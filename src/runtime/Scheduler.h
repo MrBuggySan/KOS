@@ -19,6 +19,8 @@
 
 #include "generic/EmbeddedContainers.h"
 #include "runtime/Runtime.h"
+#include "kernel/Tree.h"
+#include "kernel/ThreadNode.h"
 
 class Thread;
 
@@ -43,11 +45,15 @@ class Scheduler {
   Scheduler(const Scheduler&) = delete;                  // no copy
   const Scheduler& operator=(const Scheduler&) = delete; // no assignment
 
-public:
-  //Static variable parameters for Scheduler
-  static mword minGranularity;
+
+  //Assignment2 variables
+  mword currRealTimeCount; //only increase the task's vRuntime when currRealTimeCount == minGranularity
   static mword epochLength;
+  Tree<ThreadNode> *readyTree;
+public:
+  static mword minGranularity;
   static mword defaultEpochLength;
+
 
   Scheduler();
   void setPartner(Scheduler& s) { partner = &s; }

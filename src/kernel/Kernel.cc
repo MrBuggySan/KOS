@@ -83,7 +83,14 @@ bool String2Int(const std::string& str, mword& result)
 
 void kosMain() {
 
-//TODO: Print out the frequency of RTC here
+//TODO: Get the actual frequency of RTC from somewhere?
+mword RTCfrequency = 8192; //8192Hz
+mword numCores = 4; // I assume we are still using 4 cores
+KOUT::outl("The frequency of RTC: ");
+KOUT::outl(RTCfrequency);
+KOUT::outl();
+
+
   KOUT::outl("Welcome to KOS!", kendl);
   auto iter = kernelFS.find("motb");
   if (iter == kernelFS.end()) {
@@ -128,6 +135,9 @@ mword epochLength = 0;
             }
             num.clear();
           //enter the value to the Scheduler object
+          //Convert from milliseconds to number of RTC interrupts
+          mword RTCinterruptPerCore = (RTCfrequency / numCores);
+          minGranularity = (mword) minGranularity / (1/ RTCinterruptPerCore);
           Scheduler::minGranularity = minGranularity;
         }else{
           std::string msg = "\n2nd read value:";
@@ -140,6 +150,9 @@ mword epochLength = 0;
           }
           num.clear();
           //enter the value to the Scheduler object
+          //Convert from milliseconds to number of RTC interrupts
+          mword RTCinterruptPerCore = (RTCfrequency / numCores);
+          epochLength = (mword) epochLength / (1/ RTCinterruptPerCore);
           Scheduler::defaultEpochLength = epochLength;
         }
       }
