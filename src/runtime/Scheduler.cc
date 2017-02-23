@@ -19,7 +19,8 @@
 #include "runtime/Stack.h"
 #include "runtime/Thread.h"
 #include "kernel/Output.h"
-#include <fstream>
+#include "kernel/Output.h"
+#include "kernel/Tree.h"
 
 
 
@@ -129,7 +130,7 @@ void Scheduler::preempt() {               // IRQs disabled, lock count inflated
 
 //How to enqueue a new task to the tree?
 
-//How to deal with I/O blocking? 
+//How to deal with I/O blocking?
 
 #if TESTING_NEVER_MIGRATE
   switchThread(this);
