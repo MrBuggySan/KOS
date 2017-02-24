@@ -56,11 +56,13 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
   CHECK_LOCK_MIN(sizeof...(Args));
   Thread* nextThread;
   readyLock.acquire();
+
   for (mword i = 0; i < (target ? idlePriority : maxPriority); i += 1) {
+    //Switch all the threads infront of each queue to the target Scheduler
     if (!readyQueue[i].empty()) {
       nextThread = readyQueue[i].pop_front();
       readyCount -= 1;
-      goto threadFound;
+      goto threadFound; //switch this thread to target Scheduler.
     }
   }
   readyLock.release();
@@ -81,6 +83,8 @@ threadFound:
   Runtime::debugS("Thread switch <", (target ? 'Y' : 'S'), ">: ", FmtHex(currThread), '(', FmtHex(currThread->stackPointer), ") to ", FmtHex(nextThread), '(', FmtHex(nextThread->stackPointer), ')');
 
   Runtime::MemoryContext& ctx = Runtime::getMemoryContext();
+
+  //now that we have set the scheduler for this thread, let the thread run!?
   Runtime::setCurrThread(nextThread);
   Thread* prevThread = stackSwitch(currThread, target, &currThread->stackPointer, nextThread->stackPointer);
   // REMEMBER: Thread might have migrated from other processor, so 'this'
@@ -112,6 +116,7 @@ void Scheduler::enqueue(Thread& t) {
   GENASSERT1(t.priority < maxPriority, t.priority);
   readyLock.acquire();
   //readyQueue[t.priority].push_back(t);  //TODO: switch this for readyTree implementation
+
   //TODO: add a new thread to the readyTree
   // readyTree->insert(*(new ThreadNode(*anyThreadClassObject)));
 
@@ -151,7 +156,7 @@ if (currRealTimeCount == minGranularity){
       mword threadPrio = currThread->getPriority();
       //update vRuntime of the running task
       //according to runtime/Runtime.h the highest priority is 0 and lowest priority is 3.
-      //higher prio tasks will increment less often than lower prio tasks
+      //Therefore, higher prio tasks will increment vRuntime less often than lower prio tasks
       mword vRuntimeIncremenet = threadPrio + 1 ;
       currThread->updateVRuntime(vRuntimeIncremenet);
     }
@@ -165,19 +170,25 @@ if (currRealTimeCount == minGranularity){
 
       //TODO: the switchThread will have to figure out which thread in the readyTree to run next.
 
-      //TODO: review this set of code and see how it will affect our algorithm
-      //from a shallow analysys none of TESTING_NEVER_MIGRATE & TESTING_ALWAYS_MIGRATE are declared.
-      #if TESTING_NEVER_MIGRATE
-        switchThread(this);
-      #else /* migration enabled */
-        Scheduler* target = Runtime::getCurrThread()->getAffinity(); //this will run - Andrei
-      #if TESTING_ALWAYS_MIGRATE
-        if (!target) target = partner;
-      #else /* simple load balancing */
-        if (!target) target = (partner->readyCount + 2 < readyCount) ? partner : this; //this will run - Andrei
-      #endif
-        switchThread(target); //this will run - Andrei
-      #endif
+
+
+      // //TODO: review this set of code and see how it will affect our algorithm
+      // //from a shallow analysys none of TESTING_NEVER_MIGRATE & TESTING_ALWAYS_MIGRATE are declared.
+      // #if TESTING_NEVER_MIGRATE
+      //   switchThread(this); //Stay on this scheduler only
+      // #else /* migration enabled */
+      //   //get the possible cores for this task to run on.
+      //   Scheduler* target = Runtime::getCurrThread()->getAffinity(); //this will run - Andrei
+      // #if TESTING_ALWAYS_MIGRATE
+      //   if (!target) target = partner;
+      // #else /* simple load balancing */
+      // //TODO: do we have to modify this load balancing algorithm?
+      // //TODO: do we have to pass tasks between schedulers?
+      //   if (!target) target = (partner->readyCount + 2 < readyCount) ? partner : this; //this will run - Andrei
+      // #endif
+      //
+      //   switchThread(target); //this will run - Andrei
+      // #endif
 
 
 
