@@ -42,6 +42,12 @@ class Thread : public EmbeddedList<Thread>::Link {
   Thread(const Thread&) = delete;
   const Thread& operator=(const Thread&) = delete;
 
+//Assignment2 variables
+  mword vRuntime;         //
+
+
+
+
 protected:
   enum State { Running, Blocked, Cancelled, Finishing } state;
   UnblockInfo* unblockInfo; // unblock vs. timeout vs. cancel
@@ -55,6 +61,12 @@ protected:
   static Thread* create(vaddr mem, size_t ss);
 
 public:
+
+//Assignment2 methods
+  void updateVRuntime(mword increment){vRuntime += increment;}
+  void initVRuntime(mword init_){vRuntime = init_;}
+  mword getVRuntime(){return vRuntime;}
+
   mword getPriority(){ return priority;}
 
   static Thread* create(size_t ss);

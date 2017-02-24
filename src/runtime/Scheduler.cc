@@ -49,6 +49,9 @@ static inline void unlock(BasicLock &l, Args&... a) {
 // very simple N-class prio scheduling!
 template<typename... Args>
 inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
+  //TODO:run the leftmost task on the readyTree
+
+
   preemption += 1;
   CHECK_LOCK_MIN(sizeof...(Args));
   Thread* nextThread;
@@ -104,9 +107,24 @@ extern "C" void invokeThread(Thread* prevThread, Runtime::MemoryContext* ctx, fu
 }
 
 void Scheduler::enqueue(Thread& t) {
+
+
   GENASSERT1(t.priority < maxPriority, t.priority);
   readyLock.acquire();
-  readyQueue[t.priority].push_back(t);
+  //readyQueue[t.priority].push_back(t);  //TODO: switch this for readyTree implementation
+  //TODO: add a new thread to the readyTree
+  // readyTree->insert(*(new ThreadNode(*anyThreadClassObject)));
+
+  //Set the vRumtime of the task to vRuntime of the task of the leftmost node of the tree.
+  Thread * minThread = readyTree.readMinNode();
+  mword newVRunTime = currThread->getVRuntime();
+  t.initVRuntime(newVRunTime);
+
+  readyTree->insert((new ThreadNode(t)));
+
+  //update the epochLength?
+
+
   bool wake = (readyCount == 0);
   readyCount += 1;
   readyLock.release();
@@ -126,37 +144,52 @@ void Scheduler::preempt() {               // IRQs disabled, lock count inflated
 
 currRealTimeCount++;
 if (currRealTimeCount == minGranularity){
-    //update vRuntime of the running task
 
-    //check the tree and the current task for next task to run
+    //Check if the readyTree is empty
+    if(!readyTree.empty()){
+      Thread * currThread = readyTree.readMinNode();
+      mword threadPrio = currThread->getPriority();
+      //update vRuntime of the running task
+      //according to runtime/Runtime.h the highest priority is 0 and lowest priority is 3.
+      //higher prio tasks will increment less often than lower prio tasks
+      mword vRuntimeIncremenet = threadPrio + 1 ;
+      currThread->updateVRuntime(vRuntimeIncremenet);
+    }
+
+
+
+    //TODO:update the tree now that we have a new vRuntime for the current task
+      //pop the current task
+      //insert it again to put it in correct place inside the readyTree
+
+
+      //TODO: the switchThread will have to figure out which thread in the readyTree to run next.
+
+      //TODO: review this set of code and see how it will affect our algorithm
+      //from a shallow analysys none of TESTING_NEVER_MIGRATE & TESTING_ALWAYS_MIGRATE are declared.
+      #if TESTING_NEVER_MIGRATE
+        switchThread(this);
+      #else /* migration enabled */
+        Scheduler* target = Runtime::getCurrThread()->getAffinity(); //this will run - Andrei
+      #if TESTING_ALWAYS_MIGRATE
+        if (!target) target = partner;
+      #else /* simple load balancing */
+        if (!target) target = (partner->readyCount + 2 < readyCount) ? partner : this; //this will run - Andrei
+      #endif
+        switchThread(target); //this will run - Andrei
+      #endif
+
+
 
     currRealTimeCount = 0;
 }
 
 //How can I set up the epochlength of this CPU?
 
-//Where to assign the vRuntime to real time unit conversions?
-
-//How to count the real time units that passed for each task?
-
-//How to enqueue a new task to the tree?
-
-//How to deal with I/O blocking?
-
-#if TESTING_NEVER_MIGRATE
-  switchThread(this);
-#else /* migration enabled */
-  Scheduler* target = Runtime::getCurrThread()->getAffinity();
-#if TESTING_ALWAYS_MIGRATE
-  if (!target) target = partner;
-#else /* simple load balancing */
-  if (!target) target = (partner->readyCount + 2 < readyCount) ? partner : this;
-#endif
-  switchThread(target);
-#endif
 }
 
 void Scheduler::suspend(BasicLock& lk) {
+  //TODO:How to deal with I/O blocking?
   Runtime::FakeLock fl;
   switchThread(nullptr, lk);
 }

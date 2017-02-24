@@ -20,7 +20,7 @@ public:
 
     Tree() : root(NULL) { }
 
-    
+
     node *root;
 
     bool empty() const {
@@ -53,6 +53,7 @@ public:
         node *prev = NULL, **cur = &root;
         while (*cur) {
             prev = *cur;
+            //TODO: change the comparison to compare vRuntime instead?
             if ((*cur)->item < item) cur = &((*cur)->r);
             else cur = &((*cur)->l);
         }
