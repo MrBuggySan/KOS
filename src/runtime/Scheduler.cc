@@ -22,7 +22,9 @@
 #include "kernel/Output.h"
 
 
-
+mword Scheduler::minGranularity = 0;
+mword Scheduler::epochLength = 0;
+mword Scheduler::defaultEpochLength = 0;
 
 Scheduler::Scheduler() : readyCount(0), preemption(0), resumption(0), partner(this), currRealTimeCount(0) {
 
@@ -50,19 +52,17 @@ static inline void unlock(BasicLock &l, Args&... a) {
 template<typename... Args>
 inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
   //TODO:run the leftmost task on the readyTree
-
-
-  preemption += 1;
-  CHECK_LOCK_MIN(sizeof...(Args));
-  Thread* nextThread;
-  readyLock.acquire();
-  for (mword i = 0; i < (target ? idlePriority : maxPriority); i += 1) {
-    if (!readyQueue[i].empty()) {
-      nextThread = readyQueue[i].pop_front();
+    Thread* nextThread;
+    CHECK_LOCK_MIN(sizeof...(Args));
+    preemption += 1;
+    readyLock.acquire();
+    //if ready tree not empty, pop leftmost node of tree to nextThread
+    if(!readyTree->empty()){
+      nextThread = readyTree->popMinNode()->th;
       readyCount -= 1;
       goto threadFound;
     }
-  }
+
   readyLock.release();
   GENASSERT0(target);
   GENASSERT0(!sizeof...(Args));
@@ -81,12 +81,18 @@ threadFound:
   Runtime::debugS("Thread switch <", (target ? 'Y' : 'S'), ">: ", FmtHex(currThread), '(', FmtHex(currThread->stackPointer), ") to ", FmtHex(nextThread), '(', FmtHex(nextThread->stackPointer), ')');
 
   Runtime::MemoryContext& ctx = Runtime::getMemoryContext();
-  Runtime::setCurrThread(nextThread);
-  Thread* prevThread = stackSwitch(currThread, target, &currThread->stackPointer, nextThread->stackPointer);
-  // REMEMBER: Thread might have migrated from other processor, so 'this'
-  //           might not be currThread's Scheduler object anymore.
-  //           However, 'this' points to prevThread's Scheduler object.
-  Runtime::postResume(false, *prevThread, ctx);
+  if(currThread->getVRuntime() > nextThread->getVRuntime()){
+    Runtime::setCurrThread(nextThread);
+    Thread* prevThread = stackSwitch(currThread, target, &currThread->stackPointer, nextThread->stackPointer);
+    // REMEMBER: Thread might have migrated from other processor, so 'this'
+    //           might not be currThread's Scheduler object anymore.
+    //           However, 'this' points to prevThread's Scheduler object.
+    Runtime::postResume(false, *prevThread, ctx);
+  }
+  else{
+      readyTree->insert(nextThread);
+      readyCount+= 1;
+  }
   if (currThread->state == Thread::Cancelled) {
     currThread->state = Thread::Finishing;
     switchThread(nullptr);
@@ -116,17 +122,28 @@ void Scheduler::enqueue(Thread& t) {
   // readyTree->insert(*(new ThreadNode(*anyThreadClassObject)));
 
   //Set the vRumtime of the task to vRuntime of the task of the leftmost node of the tree.
-  Thread * minThread = readyTree.readMinNode();
-  mword newVRunTime = currThread->getVRuntime();
-  t.initVRuntime(newVRunTime);
+  Thread* minThread = readyTree->readMinNode()->th;
+  mword newVRunTime = minThread->getVRuntime();
 
-  readyTree->insert((new ThreadNode(t)));
+  if(t.vRuntime){
+    t.updateVRuntime(newVRunTime);
+  }
+  else{
+    t.initVRuntime(newVRunTime);
+  }
+
+  readyTree->insert(*(new ThreadNode(&t)));
 
   //update the epochLength?
-
-
   bool wake = (readyCount == 0);
   readyCount += 1;
+
+  if(defaultEpochLength>= readyCount * minGranularity){
+    epochLength = defaultEpochLength;
+  }
+  else{
+    epochLength = readyCount * minGranularity;
+  }
   readyLock.release();
   Runtime::debugS("Thread ", FmtHex(&t), " queued on ", FmtHex(this));
   if (wake) Runtime::wakeUp(this);
@@ -141,22 +158,7 @@ void Scheduler::resume(Thread& t) {
 
 
 void Scheduler::preempt() {               // IRQs disabled, lock count inflated
-
-currRealTimeCount++;
-if (currRealTimeCount == minGranularity){
-
-    //Check if the readyTree is empty
-    if(!readyTree.empty()){
-      Thread * currThread = readyTree.readMinNode();
-      mword threadPrio = currThread->getPriority();
-      //update vRuntime of the running task
-      //according to runtime/Runtime.h the highest priority is 0 and lowest priority is 3.
-      //higher prio tasks will increment less often than lower prio tasks
-      mword vRuntimeIncremenet = threadPrio + 1 ;
-      currThread->updateVRuntime(vRuntimeIncremenet);
-    }
-
-
+    currRealTimeCount++;
 
     //TODO:update the tree now that we have a new vRuntime for the current task
       //pop the current task
@@ -167,6 +169,17 @@ if (currRealTimeCount == minGranularity){
 
       //TODO: review this set of code and see how it will affect our algorithm
       //from a shallow analysys none of TESTING_NEVER_MIGRATE & TESTING_ALWAYS_MIGRATE are declared.
+    if(currRealTimeCount == minGranularity){
+          //Check if the readyTree is empty
+          Thread * currThread = Runtime::getCurrThread();
+          mword threadPrio = currThread->getPriority();
+          //update vRuntime of the running task
+          //according to runtime/Runtime.h the highest priority is 0 and lowest priority is 3.
+          //higher prio tasks will increment less often than lower prio tasks
+          mword vRuntimeIncrement = threadPrio + 1 ;
+          currThread->updateVRuntime(vRuntimeIncrement);
+      }
+
       #if TESTING_NEVER_MIGRATE
         switchThread(this);
       #else /* migration enabled */
@@ -178,18 +191,14 @@ if (currRealTimeCount == minGranularity){
       #endif
         switchThread(target); //this will run - Andrei
       #endif
+      currRealTimeCount = 0;
 
-
-
-    currRealTimeCount = 0;
-}
-
-//How can I set up the epochlength of this CPU?
-
+    return;
 }
 
 void Scheduler::suspend(BasicLock& lk) {
   //TODO:How to deal with I/O blocking?
+
   Runtime::FakeLock fl;
   switchThread(nullptr, lk);
 }

@@ -42,8 +42,6 @@ class Thread : public EmbeddedList<Thread>::Link {
   Thread(const Thread&) = delete;
   const Thread& operator=(const Thread&) = delete;
 
-//Assignment2 variables
-  mword vRuntime;         //
 
 
 
@@ -66,6 +64,7 @@ public:
   void updateVRuntime(mword increment){vRuntime += increment;}
   void initVRuntime(mword init_){vRuntime = init_;}
   mword getVRuntime(){return vRuntime;}
+  void setVRuntime(mword value){vRuntime += value;}
 
   mword getPriority(){ return priority;}
 
