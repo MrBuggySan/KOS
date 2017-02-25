@@ -67,14 +67,12 @@ inline void Scheduler::switchThread(Scheduler* target, Args&... a) {
   CHECK_LOCK_MIN(sizeof...(Args));
   Thread* nextThread;
   readyLock.acquire();
-
   for (mword i = 0; i < (target ? idlePriority : maxPriority); i += 1) {
-    //Switch all the threads infront of each queue to the target Scheduler
     if (!readyQueue[i].empty()) {
       nextThread = readyQueue[i].pop_front();
 >>>>>>> 5fa997d579614b9d401f1790ee87b751a3612410
       readyCount -= 1;
-      goto threadFound; //switch this thread to target Scheduler.
+      goto threadFound;
     }
 
   readyLock.release();
@@ -96,6 +94,7 @@ threadFound:
 
   Runtime::MemoryContext& ctx = Runtime::getMemoryContext();
 <<<<<<< HEAD
+<<<<<<< HEAD
   if(currThread->getVRuntime() > nextThread->getVRuntime()){
     Runtime::setCurrThread(nextThread);
     Thread* prevThread = stackSwitch(currThread, target, &currThread->stackPointer, nextThread->stackPointer);
@@ -111,6 +110,8 @@ threadFound:
 =======
 
   //now that we have set the scheduler for this thread, let the thread run!?
+=======
+>>>>>>> parent of 5fa997d... comment updates.
   Runtime::setCurrThread(nextThread);
   Thread* prevThread = stackSwitch(currThread, target, &currThread->stackPointer, nextThread->stackPointer);
   // REMEMBER: Thread might have migrated from other processor, so 'this'
@@ -143,7 +144,6 @@ void Scheduler::enqueue(Thread& t) {
   GENASSERT1(t.priority < maxPriority, t.priority);
   readyLock.acquire();
   //readyQueue[t.priority].push_back(t);  //TODO: switch this for readyTree implementation
-
   //TODO: add a new thread to the readyTree
   // readyTree->insert(*(new ThreadNode(*anyThreadClassObject)));
 
@@ -197,7 +197,7 @@ if (currRealTimeCount == minGranularity){
       mword threadPrio = currThread->getPriority();
       //update vRuntime of the running task
       //according to runtime/Runtime.h the highest priority is 0 and lowest priority is 3.
-      //Therefore, higher prio tasks will increment vRuntime less often than lower prio tasks
+      //higher prio tasks will increment less often than lower prio tasks
       mword vRuntimeIncremenet = threadPrio + 1 ;
       currThread->updateVRuntime(vRuntimeIncremenet);
     }
@@ -213,6 +213,7 @@ if (currRealTimeCount == minGranularity){
       //TODO: the switchThread will have to figure out which thread in the readyTree to run next.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       //TODO: review this set of code and see how it will affect our algorithm
       //from a shallow analysys none of TESTING_NEVER_MIGRATE & TESTING_ALWAYS_MIGRATE are declared.
     if(currRealTimeCount == minGranularity){
@@ -226,6 +227,10 @@ if (currRealTimeCount == minGranularity){
           currThread->updateVRuntime(vRuntimeIncrement);
       }
 
+=======
+      //TODO: review this set of code and see how it will affect our algorithm
+      //from a shallow analysys none of TESTING_NEVER_MIGRATE & TESTING_ALWAYS_MIGRATE are declared.
+>>>>>>> parent of 5fa997d... comment updates.
       #if TESTING_NEVER_MIGRATE
         switchThread(this);
       #else /* migration enabled */
@@ -237,6 +242,7 @@ if (currRealTimeCount == minGranularity){
       #endif
         switchThread(target); //this will run - Andrei
       #endif
+<<<<<<< HEAD
       currRealTimeCount = 0;
 =======
 
@@ -259,6 +265,8 @@ if (currRealTimeCount == minGranularity){
       //   switchThread(target); //this will run - Andrei
       // #endif
 >>>>>>> 5fa997d579614b9d401f1790ee87b751a3612410
+=======
+>>>>>>> parent of 5fa997d... comment updates.
 
     return;
 }
